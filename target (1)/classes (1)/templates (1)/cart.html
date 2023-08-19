@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cart</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+          rel="stylesheet">
+    <link crossorigin="anonymous"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          rel="stylesheet">
+    <style>
+        table {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-md bg-dark navbar-dark">
+    <!-- Brand -->
+    <a class="navbar-brand" href="#">Book Management System</a>
+
+    <!-- Toggler/collapsibe Button -->
+    <button class="navbar-toggler" data-target="#collapsibleNavbar" data-toggle="collapse" type="button">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <!--Nói một cách đơn giản, chúng ta sử dụng thuộc tính sec: Authoze để kiểm soát nội dung hiển thị.
+    Giao diện Xác thực  hiển thị các phương pháp hữu ích liên quan đến yêu cầu xác thực hoặc chính đã được xác thực.-->
+    <!-- Navbar links -->
+    <div class="collapse navbar-collapse" id="collapsibleNavbar">
+        <ul class="navbar-nav">
+            <li class="nav-item" sec:authorize="!isAuthenticated()">
+                <a class="nav-link" th:href="@{/login}">Login</a>
+            </li>
+            <li class="nav-item" sec:authorize="!isAuthenticated()">
+                <a class="nav-link" href="/registration">Register</a>
+            </li>
+            <li class="nav-item" sec:authorize="isAuthenticated()">
+                <form id="logoutForm" method="POST" th:action="@{/logout}">
+                    <input name="${_csrf.parameterName}" type="hidden" value="${_csrf.token}"/>
+                </form>
+                <a class="nav-link">Welcome <span sec:authentication="name"></span></a>
+            </li>
+            <li class="nav-item" sec:authorize="isAuthenticated()">
+                <a class="nav-link" th:href="@{/books}"><i class="fa-solid fa-book"></i> Books</a>
+            </li>
+            <li class="nav-item" sec:authorize="isAuthenticated()">
+                <a class="nav-link" th:href="@{/cart}"><i class="fa-solid fa-cart-shopping"></i> Cart</a>
+            </li>
+            <li class="nav-item" sec:authorize="isAuthenticated()">
+                <form id="cartForm" method="POST" th:action="@{/logout}">
+                    <input name="${_csrf.parameterName}" type="hidden" value="${_csrf.token}"/>
+                </form>
+                <a class="nav-link" onclick="document.forms['logoutForm'].submit()">Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <br>
+    <div class="row">
+        <h1> Cart </h1>
+    </div>
+
+    <div sec:authorize="isAuthenticated()">
+        <div class="row">
+            <div class="card-body">
+                <form enctype="multipart/form-data" method="POST" th:action="@{/payment}">
+                    <div class='row'>
+                        <div class="form-group" style="width: 100%;">
+                            <label> Address </label>
+                            <input required class="form-control"
+                                   name="address"
+                                   placeholder="Enter Address"
+                                   type="text"
+                            />
+                        </div>
+                    </div>
+
+                    <div class='row'>
+                        <div class="form-group" style="width: 100%;">
+                            <label> Payment type </label>
+                            <select class="form-control" name="paymentType"
+                                    placeholder="Select a Payment Type">
+                                <option value="Credit / Debit Card">Credit / Debit Card</option>
+                                <option value="ShopeePay">ShopeePay</option>
+                                <option value="Online Banking">Online Banking</option>
+                                <option value="Cash on Delivery (COD)">Cash on Delivery (COD)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class='row'>
+                        <div class="form-group" style="width: 100%;">
+                            <label> Shipping type </label>
+                            <select class="form-control" name="shippingType"
+                                    placeholder="Select a Shipping Type">
+                                <option value="Normal">Normal</option>
+                                <option value="Xpress">Xpress</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <button class="btn btn-primary" type="submit">
+                            Make a payment
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+        <hr>
+        <h3 style="color: cornflowerblue" th:text="'Total price: ' + ${totalPrice} + ' $'"></h3>
+        <hr>
+    </div>
+
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+        <tr>
+            <th> Title</th>
+            <th> Author</th>
+            <!-- <th> Description </th> -->
+<!--            <th> Published date</th>-->
+<!--            <th> Number of pages</th>-->
+<!--            <th> Category</th>-->
+            <th> Photo</th>
+            <th> Number</th>
+            <th> Price</th>
+            <th> Total price</th>
+            <th sec:authorize="isAuthenticated()"> Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="book: ${bookCarts}">
+            <td th:text="${book.getBook().title}"></td>
+            <td th:text="${book.getBook().author}"></td>
+            <!--   <td th:text = "${book.description}"></td> -->
+<!--            <td th:text="${#strings.arraySplit(book.getBook().publishedDate,' ')[0]}"></td>-->
+<!--            <td th:text="${book.getBook().numberOfPages}"></td>-->
+<!--            <td th:text="${book.getBook().category.getName()}"></td>-->
+            <td>
+                <img height="50"
+                     onerror="this.src='https://media.istockphoto.com/id/936182806/vector/no-image-available-sign.jpg?s=612x612&w=0&k=20&c=9HTEtmbZ6R59xewqyIQsI_pQl3W3QDJgnxFPIHb4wQE='"
+                     th:src="@{${book.getBook().getPhotoPath()}}" width="50"/>
+            </td>
+            <td style="background-color: beige" th:text="${book.getNumber()}"></td>
+            <td style="background-color: beige" th:text="${book.getBook().price} + ' $'"></td>
+            <td style="background-color: beige" th:text="${book.getNumber() * book.getBook().price} + ' $'"></td>
+            <td sec:authorize="isAuthenticated()">
+                <a class="btn btn-primary"
+                   th:href="@{/books/view/{id}(id=${book.getBook().getId()})}">View</a>
+
+                <a class="btn btn-danger" onclick="return confirm('Are you sure?')"
+                   th:href="@{/cart/{id}(id=${book.getBook().getId()})}">Delete</a>
+            </td>
+        </tr>
+        </tbody>
+
+    </table>
+
+</div>
+</body>
+</html>

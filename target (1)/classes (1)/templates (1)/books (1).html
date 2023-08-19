@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Book Management System</title>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+  <link rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+  <style>
+    table {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-md bg-dark navbar-dark">
+  <!-- Brand -->
+  <a class="navbar-brand" href="#">Book Management System</a>
+
+  <!-- Toggler/collapsibe Button -->
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <!--Nói một cách đơn giản, chúng ta sử dụng thuộc tính sec: Authoze để kiểm soát nội dung hiển thị.
+  Giao diện Xác thực  hiển thị các phương pháp hữu ích liên quan đến yêu cầu xác thực hoặc chính đã được xác thực.-->
+  <!-- Navbar links -->
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+      <li sec:authorize="!isAuthenticated()" class="nav-item">
+        <a class="nav-link" th:href="@{/login}">Login</a>
+      </li>
+      <li sec:authorize="!isAuthenticated()" class="nav-item">
+        <a class="nav-link" href="/registration">Register</a>
+      </li>
+      <li sec:authorize="isAuthenticated()" class="nav-item">
+        <form id="logoutForm" method="POST" th:action="@{/logout}">
+          <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        </form>
+        <a class="nav-link" >Welcome <span sec:authentication="name"></span></a>
+      </li>
+      <li sec:authorize="isAuthenticated()" class="nav-item">
+        <a class="nav-link" th:href="@{/books}"><i class="fa-solid fa-book"></i> Books</a>
+      </li>
+      <li sec:authorize="isAuthenticated()" class="nav-item">
+        <a class="nav-link" th:href="@{/cart}"><i class="fa-solid fa-cart-shopping"></i> Cart</a>
+      </li>
+      <li sec:authorize="isAuthenticated()" class="nav-item">
+        <form id="cartForm" method="POST" th:action="@{/logout}">
+          <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        </form>
+        <a class="nav-link" onclick="document.forms['logoutForm'].submit()">Logout</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class ="container">
+  <div class = "row">
+    <h1> List Books </h1>
+  </div>
+
+  <div sec:authorize="isAuthenticated()" th:if = "${isAdmin}">
+    <div class = "row">
+      <div class = "col-lg-3">
+        <a th:href = "@{/books/new}" class = "btn btn-primary btn-sm mb-3"> Add Book</a>
+      </div>
+    </div>
+  </div>
+
+  <table class = "table table-striped table-bordered">
+    <thead class = "table-dark">
+    <tr>
+      <th> Title </th>
+      <th> Author</th>
+     <!-- <th> Description </th> -->
+<!--      <th> Published date </th>-->
+<!--      <th> Number of pages </th>-->
+<!--      <th> Category </th>-->
+      <th> Photo </th>
+      <th> Price </th>
+      <th> Actions </th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr th:each = "book: ${books}">
+      <td th:text = "${book.title}"></td>
+      <td th:text = "${book.author}"></td>
+   <!--   <td th:text = "${book.description}"></td> -->
+<!--      <td th:text="${#strings.arraySplit(book.publishedDate,' ')[0]}"></td>-->
+<!--      <td th:text = "${book.numberOfPages}"></td>-->
+<!--      <td th:text = "${book.category.getName()}"></td>-->
+      <td>
+        <img th:src="@{${book.getPhotoPath()}}" onerror="this.src='https://media.istockphoto.com/id/936182806/vector/no-image-available-sign.jpg?s=612x612&w=0&k=20&c=9HTEtmbZ6R59xewqyIQsI_pQl3W3QDJgnxFPIHb4wQE='" width="50" height="50"/>
+      </td>
+      <td th:text = "${book.price} + '$'"></td>
+      <td >
+        <a th:href = "@{/books/view/{id}(id=${book.id})}"
+           class = "btn btn-primary">View</a>
+
+        <a sec:authorize="isAuthenticated()" th:href = "@{/books/{id}(id=${book.id})}" onclick="return confirm('Are you sure?')" th:if = "${isAdmin}"
+           class = "btn btn-danger">Delete</a>
+
+      </td>
+    </tr>
+    </tbody>
+
+  </table>
+
+</div>
+</body>
+</html>

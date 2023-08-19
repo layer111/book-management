@@ -1,0 +1,191 @@
+
+.main-section{
+    background:#FFFFFF;
+    width:100%;
+    margin: 0 auto;
+    padding: 10px;
+    margin-top:50px;
+    box-shadow:0px 2px 7px 1px #aa9191;
+}
+.hedding-title h1{
+    margin:0px;
+    padding:0px 0px 10px 0px;
+    font-size:25px;
+}
+.average-rating{
+    float:left;
+    text-align: center;
+    width:30%;
+}
+.average-rating h2{
+    margin:0px;
+    font-size:80px;
+}
+.average-rating p{
+    margin:0px;
+    font-size:20px;
+}
+.fa-star,.fa-star-o,.fa-star-half-o{
+    color:#FDC91B;
+    font-size:25px !important;
+}
+.progress,.progress-2,.progress-3,.progress-4,.progress-5{
+    background:#F5F5F5;
+    border-radius: 13px;
+    height:29px;
+    width:97%;
+    padding:3px;
+    margin:5px 0px 3px 0px;
+}
+.progress:after,.progress-2:after,.progress-3:after,.progress-4:after,.progress-5:after{
+    content: '';
+    display: block;
+    background: #337AB7;
+    width:var(--p1);
+    height: 100%;
+    border-radius: 9px;
+}
+.progress-2:after{
+    width: var(--p2);
+}
+.progress-3:after{
+    width: var(--p3);
+}
+.progress-4:after{
+    width: var(--p4);
+}
+.progress-5:after{
+    width: var(--p5);
+}
+.loder-ratimg{
+    display: inline-block;
+    width:40%;
+}
+.start-part{
+    float:right;
+    width:30%;
+}
+.start-part span{
+    color:#337AB7;
+    font-size:23px;
+}
+.reviews h1{
+    margin:10px 0px 20px 30px;
+}
+.user-img img{
+    height: 80px;
+    width: 80px;
+    border:1px solid blue;
+    border-radius: 50%;
+}
+.user-img-part{
+    width:30%;
+    float:left;
+}
+.user-img{
+    width:48%;
+    float:left;
+    text-align: center;
+}
+.user-text{
+    float:left;
+}
+.user-text h4,.user-text p{
+    margin:0px 0px 5px 0px;
+}
+.user-text p{
+    font-size: 20px;
+    font-weight: bold;
+}
+.user-text h4,.user-text span{
+    color:#B3B5B4;
+}
+.comment{
+    width:68%;
+    float:right;
+}
+
+.animated {
+    -webkit-transition: height 0.2s;
+    -moz-transition: height 0.2s;
+    transition: height 0.2s;
+}
+
+.stars
+{
+    margin: 20px 0;
+    font-size: 24px;
+    color: #d17581;
+}
+
+@import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
+/*reset css*/
+#rating{border:none;float:left;}
+#rating>input{display:none;}/*ẩn input radio - vì chúng ta đã có label là GUI*/
+#rating>label:before{margin:5px;font-size:1.25em;font-family:FontAwesome;display:inline-block;content:"\f005";}/*1 ngôi sao*/
+#rating>.half:before{content:"\f089";position:absolute;}/*0.5 ngôi sao*/
+#rating>label{color:#ddd;float:right;}/*float:right để lật ngược các ngôi sao lại đúng theo thứ tự trong thực tế*/
+/*thêm màu cho sao đã chọn và các ngôi sao phía trước*/
+#rating>input:checked~label,
+#rating:not(:checked)>label:hover,
+#rating:not(:checked)>label:hover~label{color:#FFD700;}
+/* Hover vào các sao phía trước ngôi sao đã chọn*/
+#rating>input:checked+label:hover,
+#rating>input:checked~label:hover,
+#rating>label:hover~input:checked~label,
+#rating>input:checked~label:hover~label{color:#FFED85;}
+
+.fa-cart-plus{
+    background:#0652DD;
+}
+
+.addtocart{
+    display:block;
+    padding:0.5em 1em 0.5em 1em;
+    border-radius:100px;
+    border:none;
+    font-size:17.5px;
+    position:relative;
+    background:#0652DD;
+    cursor:pointer;
+    height:50px;
+    width:10em;
+    overflow:hidden;
+    transition:transform 0.1s;
+    z-index:1;
+}
+.addtocart:hover{
+    transform:scale(1.1);
+}
+.pretext{
+    color:#fff;
+    background:#0652DD;
+    position:absolute;
+    top:0;
+    left:0;
+    height:100%;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family: 'Quicksand', sans-serif;
+}
+i{
+    margin-right:10px;
+}
+.done{
+    background:#be2edd;
+    position:absolute;
+    width:100%;
+    top:0;
+    left:0;
+    transition:transform 0.3s ease;
+
+    transform:translate(-110%) skew(-40deg);
+}
+.posttext{
+    background:#be2edd;
+}
+.fa-check{
+    background:#be2edd;
+}

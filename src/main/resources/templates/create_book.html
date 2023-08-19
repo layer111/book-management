@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- nhớ khai báo name space: xmlns:th="http://www.thymeleaf.org" trong thẻ html để trình ide hiểu được các thẻ th.-->
+<head>
+    <meta charset="UTF-8">
+    <title>Book Management System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+          rel="stylesheet">
+    <link crossorigin="anonymous"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          rel="stylesheet">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+          type="text/css">
+    <link href="/css/book_view.css" rel="stylesheet">
+    <style>
+        .has-error {
+            color: red;
+        }
+
+        .box-footer {
+            float: right;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-md bg-dark navbar-dark">
+    <!-- Brand -->
+    <a class="navbar-brand" href="#">Book Management System</a>
+
+    <!-- Toggler/collapsibe Button -->
+    <button class="navbar-toggler" data-target="#collapsibleNavbar" data-toggle="collapse" type="button">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <!--Nói một cách đơn giản, chúng ta sử dụng thuộc tính sec: Authoze để kiểm soát nội dung hiển thị.
+    Giao diện Xác thực  hiển thị các phương pháp hữu ích liên quan đến yêu cầu xác thực hoặc chính đã được xác thực.-->
+    <!-- Navbar links -->
+    <div class="collapse navbar-collapse" id="collapsibleNavbar">
+        <ul class="navbar-nav">
+            <li class="nav-item" sec:authorize="!isAuthenticated()">
+                <a class="nav-link" th:href="@{/login}">Login</a>
+            </li>
+            <li class="nav-item" sec:authorize="!isAuthenticated()">
+                <a class="nav-link" href="/registration">Register</a>
+            </li>
+            <li class="nav-item" sec:authorize="isAuthenticated()">
+                <form id="logoutForm" method="POST" th:action="@{/logout}">
+                    <input name="${_csrf.parameterName}" type="hidden" value="${_csrf.token}"/>
+                </form>
+                <a class="nav-link">Welcome <span sec:authentication="name"></span></a>
+            </li>
+            <li class="nav-item" sec:authorize="isAuthenticated()">
+                <a class="nav-link" th:href="@{/books}"><i class="fa-solid fa-book"></i> Books</a>
+            </li>
+            <li class="nav-item" sec:authorize="isAuthenticated()">
+                <a class="nav-link" th:href="@{/cart}"><i class="fa-solid fa-cart-shopping"></i> Cart</a>
+            </li>
+            <li class="nav-item" sec:authorize="isAuthenticated()">
+                <form id="cartForm" method="POST" th:action="@{/logout}">
+                    <input name="${_csrf.parameterName}" type="hidden" value="${_csrf.token}"/>
+                </form>
+                <a class="nav-link" onclick="document.forms['logoutForm'].submit()">Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<br>
+<br>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 container justify-content-center card">
+            <h1 class="text-center"> Book </h1>
+            <div class="card-body">
+                <!--  enctype = ”Multiart / form-data” tạo thành thẻ biểu mẫu, để cho trình duyệt biết rằng biểu mẫu này có thể chứa tệp tải lên.-->
+
+                <form enctype="multipart/form-data" method="POST"
+                      th:action="${mode}=='create' ? @{/books} : @{/books/{id}(id=${book.id})}" th:object="${book}">
+                    <!--  enctype = ”Multiart / form-data” tạo thành thẻ biểu mẫu, để cho trình duyệt biết rằng biểu mẫu này có thể chứa tệp tải lên. -->
+                    <div class='row'>
+                        <div class='col-sm-4'>
+                            <div class="form-group form-group required">
+                                <label class='control-label'> Title </label>
+                                <input class="form-control"
+                                       name="title"
+                                       placeholder="Enter Book Title"
+                                       th:field="*{title}"
+                                       th:readonly="${mode=='view'}"
+                                       type="text"
+                                />
+                                <span class="has-error" th:errors="*{title}"
+                                      th:if="${#fields.hasErrors('title')}"></span>
+                            </div>
+                        </div>
+                        <div class='col-sm-4'>
+                            <div class="form-group form-group required">
+                                <label class='control-label'> Author </label>
+                                <input class="form-control"
+                                       name="author"
+                                       placeholder="Enter Book Author"
+                                       th:field="*{author}"
+                                       th:readonly="${mode=='view'}"
+                                       type="text"
+                                />
+                                <span class="has-error" th:errors="*{author}"
+                                      th:if="${#fields.hasErrors('author')}"></span>
+                            </div>
+                        </div>
+                        <div class='col-sm-4' style="text-align: center" th:if="${mode!='view'}">
+                            <label style="color: white"> . </label> <br>
+                            <input accept="image/*" class="file" name="image" style="display: none" type="file">
+                            <!--    <input type="text" style="display: none" class="form-control" disabled placeholder="Upload File" id="file"> -->
+                            <div class="input-group-append" style="display: contents">
+                                <button class="browse btn btn-primary" type="button">Upload Image</button>
+                                <button class="btn btn-danger" onclick="deleteImage()" th:if="${mode!='create'}"
+                                        type="button">Delete Image
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class='row'>
+                        <div class='col-sm-8'>
+                            <div class="form-group">
+                                <label> Description </label>
+<!--                                <input class="form-control" name="description"-->
+<!--                                       placeholder="Enter Book Description"-->
+<!--                                       style="height: 200px"-->
+<!--                                       th:field="*{description}"-->
+<!--                                       th:readonly="${mode=='view'}"-->
+<!--                                       type="text"-->
+<!--                                />-->
+                                <textarea class="form-control" name="description"
+                                          placeholder="Enter Book Description"
+                                          rows="12%"
+                                          th:field="*{description}"
+                                          th:readonly="${mode=='view'}">
+
+                                </textarea>
+                                <span class="has-error" th:errors="*{description}"
+                                      th:if="${#fields.hasErrors('description')}"></span>
+                            </div>
+                        </div>
+                        <div class='col-sm-4'>
+                            <div class="form-group">
+                                <label> </label> <br>
+                                <img class="img-thumbnail" id="preview" th:src="@{${book.getPhotoPath()}}">
+                                <input class="form-control" name="description"
+                                       placeholder="Enter Book Description"
+                                       style="display:none; height: 200px"
+                                       th:field="*{photos}"
+                                       th:readonly="${mode=='view'}"
+                                       type="text"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class='row'>
+                        <div class='col-sm-4'>
+                            <div class="form-group form-group required">
+                                <label class='control-label'> Published Date </label>
+                                <input class="form-control"
+                                       name="publishedDate"
+                                       placeholder="Enter Book Published Date"
+                                       th:field="*{publishedDate}"
+                                       th:readonly="${mode=='view'}"
+                                       type="date"
+                                />
+                                <span class="has-error" th:errors="*{publishedDate}"
+                                      th:if="${#fields.hasErrors('publishedDate')}"></span>
+                            </div>
+                        </div>
+                        <div class='col-sm-4'>
+                            <div class="form-group">
+                                <label> Number of pages </label>
+                                <input class="form-control"
+                                       name="numberOfPages"
+                                       placeholder="Enter Number Of Pages"
+                                       th:field="*{numberOfPages}"
+                                       th:readonly="${mode=='view'}"
+                                       type="number"
+                                />
+                                <span class="has-error" th:errors="*{numberOfPages}"
+                                      th:if="${#fields.hasErrors('numberOfPages')}"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class='row'>
+                        <div class='col-sm-4'>
+                            <div class="form-group">
+                                <label> Category </label>
+                                <select class="form-control" id="cars" name="category"
+                                        placeholder="Select Book Category" th:disabled="${mode=='view'}"
+                                        th:field="*{category}"
+                                        th:readonly="${mode=='view'}">
+                                    <option th:each="cat: ${categories}" th:text="${cat.name}"
+                                            th:value="${cat.id}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class='col-sm-4'>
+                            <div class="form-group form-group required">
+                                <label class='control-label'> Price </label>
+                                <input class="form-control"
+                                       name="price"
+                                       min="0"
+                                       placeholder="Enter Price ($)"
+                                       step="0.01"
+                                       th:field="*{price}"
+                                       th:readonly="${mode=='view'}" type="number"
+                                />
+                                <span class="has-error" th:errors="*{price}"
+                                      th:if="${#fields.hasErrors('price')}"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="box-footer" th:if="${mode=='view' && isAdmin}" sec:authorize="isAuthenticated()">
+                        <a class="btn btn-primary"
+                           th:href="@{/books/edit/{id}(id=${book.id})}">Edit</a>
+                    </div>
+                    <div class="box-footer" th:if="${mode=='create'}">
+                        <button class="btn btn-primary" type="submit">
+                            Add
+                        </button>
+                    </div>
+                    <div class="box-footer" th:if="${mode=='edit'}">
+                        <button class="btn btn-primary" type="submit">
+                            Save
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+    <br>
+
+    <div sec:authorize="isAuthenticated()" class="row justify-content-center" th:if="${mode!='create'}">
+        <form enctype="multipart/form-data" method="POST"
+              th:action="@{/cart}" onsubmit="return submitCart(event)">
+            <input name="bookId" th:field="${book.id}" type="hidden">
+            <div class='row'>
+                <div class='col-sm-4'>
+                    <div class="form-group">
+                        <label> Enter the number </label>
+                        <input class="form-control" id="number"
+                               name="number" min="1"
+                               placeholder="" type="number" th:value="${number} == -1 ? 0 : ${number}" th:readonly="${isBuy}"
+                        />
+                    </div>
+                </div>
+                <div class='col-sm-4 align-self-center'>
+                    <button th:disabled="${isBuy}" class="addtocart">
+                        <div th:if="${!isBuy}" class="pretext">
+                            <i class="fas fa-cart-plus"></i> ADD TO CART
+                        </div>
+
+                        <div th:if="${isBuy}" class="pretext done" style="transform: translate(0px)">
+                            <div class="posttext"><i class="fas fa-check"></i> ADDED</div>
+                        </div>
+
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <br>
+    <!--code phần giao diện viết review và chọn sao -->
+    <div sec:authorize="isAuthenticated()" class="row" id="post-review-box" th:if="${mode!='create'}">
+        <div class="col-md-12">
+            <form accept-charset="UTF-8" method="post" th:action="@{/reviews}">
+                <input name="bookId" th:field="${book.id}" type="hidden">
+                <input id="ratings-hidden" type="hidden">
+                <div id="rating">
+                    <input checked id="star5" name="rating" type="radio" value="5"/>
+                    <label class="full" for="star5" title="Awesome - 5 stars"></label>
+
+                    <input id="star4" name="rating" type="radio" value="4"/>
+                    <label class="full" for="star4" title="Pretty good - 4 stars"></label>
+
+                    <input id="star3" name="rating" type="radio" value="3"/>
+                    <label class="full" for="star3" title="Meh - 3 stars"></label>
+
+                    <input id="star2" name="rating" type="radio" value="2"/>
+                    <label class="full" for="star2" title="Kinda bad - 2 stars"></label>
+
+                    <input id="star1" name="rating" type="radio" value="1"/>
+                    <label class="full" for="star1" title="Sucks big time - 1 star"></label>
+                </div>
+                <textarea class="form-control animated" cols="50" id="new-review" name="comment"
+                          placeholder="Enter your review here..." rows="5"></textarea>
+
+                <div class="text-right">
+                    <br>
+                    <button class="btn btn-success" type="submit">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-section" th:if="${mode!='create'}">
+        <div class="rating-part">
+            <div class="average-rating">
+                <h2 th:text="${book.getAvgRating()}"></h2>
+                <i aria-hidden="true" th:class="${book.getAvgRating() >= 1} ? 'fa fa-star' : 'fa fa-star-o'"></i>
+                <i aria-hidden="true" th:class="${book.getAvgRating() >= 2} ? 'fa fa-star' : 'fa fa-star-o'"></i>
+                <i aria-hidden="true" th:class="${book.getAvgRating() >= 3} ? 'fa fa-star' : 'fa fa-star-o'"></i>
+                <i aria-hidden="true" th:class="${book.getAvgRating() >= 4} ? 'fa fa-star' : 'fa fa-star-o'"></i>
+                <i aria-hidden="true" th:class="${book.getAvgRating() >= 5} ? 'fa fa-star' : 'fa fa-star-o'"></i>
+                <p>Average Rating</p>
+            </div>
+            <div class="loder-ratimg">
+                <div class="progress" th:style="'--p1:' + ${book.getPercentByStar().get('5')} + '%'"></div>
+                <div class="progress-2" th:style="'--p2:' + ${book.getPercentByStar().get('4')} + '%'"></div>
+                <div class="progress-3" th:style="'--p3:' + ${book.getPercentByStar().get('3')} + '%'"></div>
+                <div class="progress-4" th:style="'--p4:' + ${book.getPercentByStar().get('2')} + '%'"></div>
+                <div class="progress-5" th:style="'--p5:' + ${book.getPercentByStar().get('1')} + '%'"></div>
+            </div>
+            <div class="start-part">
+                <i aria-hidden="true" class="fa fa-star"></i>
+                <i aria-hidden="true" class="fa fa-star"></i>
+                <i aria-hidden="true" class="fa fa-star"></i>
+                <i aria-hidden="true" class="fa fa-star"></i>
+                <i aria-hidden="true" class="fa fa-star"></i>
+                <span th:text="${book.getPercentByStar().get('5')} + '%'"></span><br>
+                <i aria-hidden="true" class="fa fa-star"></i>
+                <i aria-hidden="true" class="fa fa-star"></i>
+                <i aria-hidden="true" class="fa fa-star"></i>
+                <i aria-hidden="true" class="fa fa-star"></i>
+                <i aria-hidden="true" class="fa fa-star-o"></i>
+                <span th:text="${book.getPercentByStar().get('4')} + '%'"></span><br>
+                <i aria-hidden="true" class="fa fa-star"></i>
+                <i aria-hidden="true" class="fa fa-star"></i>
+                <i aria-hidden="true" class="fa fa-star"></i>
+                <i aria-hidden="true" class="fa fa-star-o"></i>
+                <i aria-hidden="true" class="fa fa-star-o"></i>
+                <span th:text="${book.getPercentByStar().get('3')} + '%'"></span><br>
+                <i aria-hidden="true" class="fa fa-star"></i>
+                <i aria-hidden="true" class="fa fa-star"></i>
+                <i aria-hidden="true" class="fa fa-star-o"></i>
+                <i aria-hidden="true" class="fa fa-star-o"></i>
+                <i aria-hidden="true" class="fa fa-star-o"></i>
+                <span th:text="${book.getPercentByStar().get('2')} + '%'"></span><br>
+                <i aria-hidden="true" class="fa fa-star"></i>
+                <i aria-hidden="true" class="fa fa-star-o"></i>
+                <i aria-hidden="true" class="fa fa-star-o"></i>
+                <i aria-hidden="true" class="fa fa-star-o"></i>
+                <i aria-hidden="true" class="fa fa-star-o"></i>
+                <span th:text="${book.getPercentByStar().get('1')} + '%'"></span><br>
+            </div>
+            <div style="clear: both;"></div>
+            <div class="reviews"><h1>Reviews</h1></div>
+            <div class="comment-part" th:each="i : ${#numbers.sequence(book.getReviews().size() - 1, 0, -1)}">
+                <hr>
+                <div class="user-img-part">
+                    <div class="user-img" style="width: 100%; text-align: center;">
+                        <img src="https://w7.pngwing.com/pngs/831/88/png-transparent-user-profile-computer-icons-user-interface-mystique-miscellaneous-user-interface-design-smile-thumbnail.png">
+                    </div>
+                    <div class="user-text" style="width: 100%; text-align: center;">
+                        <p th:text="${book.reviews[i].user.getEmail()}"></p>
+                    </div>
+                    <div style="clear: both;"></div>
+                </div>
+                <div class="comment">
+                    <i aria-hidden="true" th:class="${book.reviews[i].star >= 1} ? 'fa fa-star' : 'fa fa-star-o'"></i>
+                    <i aria-hidden="true" th:class="${book.reviews[i].star >= 2} ? 'fa fa-star' : 'fa fa-star-o'"></i>
+                    <i aria-hidden="true" th:class="${book.reviews[i].star >= 3} ? 'fa fa-star' : 'fa fa-star-o'"></i>
+                    <i aria-hidden="true" th:class="${book.reviews[i].star >= 4} ? 'fa fa-star' : 'fa fa-star-o'"></i>
+                    <i aria-hidden="true" th:class="${book.reviews[i].star >= 5} ? 'fa fa-star' : 'fa fa-star-o'"></i>
+                    <p th:text="${book.reviews[i].comment}"></p>
+                </div>
+                <div style="clear: both;"></div>
+                <hr>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on("click", ".browse", function () {
+        console.log('Go here');
+        var file = $(this).parents().find(".file");
+        file.trigger("click");
+    });
+    $('input[type="file"]').change(function (e) {
+        var fileName = e.target.files[0].name;
+        $("#file").val(fileName);
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            // get loaded data and render thumbnail.
+            document.getElementById("preview").src = e.target.result;
+        };
+        // read the image file as a data URL.
+        reader.readAsDataURL(this.files[0]);
+    });
+
+    // xmlHTTP return blob respond: lấy dữ liệu từ đâu đó và trả về dưới dạng blob
+    function getImgURL(url, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+            callback(xhr.response);
+        };
+        xhr.open('GET', url);
+        xhr.responseType = 'blob';
+        xhr.send();
+    }
+
+    function deleteImage() {
+        let noImageUrl = 'https://media.istockphoto.com/id/936182806/vector/no-image-available-sign.jpg?s=612x612&w=0&k=20&c=9HTEtmbZ6R59xewqyIQsI_pQl3W3QDJgnxFPIHb4wQE=';
+        getImgURL(noImageUrl, (imgBlob) => {
+            // Load img blob to input
+            // WIP: UTF8 character error
+            let fileName = 'hasFilename.jpg'
+            let file = new File([imgBlob], fileName, {type: "image/jpeg", lastModified: new Date().getTime()}, 'utf-8');
+            let container = new DataTransfer();
+            container.items.add(file);
+            document.querySelector('.file').files = container.files;
+        });
+        document.getElementById('preview').src = noImageUrl;
+    }
+
+    function calcRate(r) {
+        const f = ~~r,//Tương tự Math.floor(r)
+            id = 'star' + f + (r % f ? 'half' : '')
+        id && (document.getElementById(id).checked = !0)
+    }
+
+    const button = document.querySelector(".addtocart");
+    const done = document.querySelector(".done");
+    console.log(button);
+    let added = false;
+
+    function submitCart(e) {
+<!--        let val = document.getElementById('number').value;-->
+<!--        if (val === '') {-->
+<!--         alert("Please enter the number to order");-->
+<!--            e.preventDefault();-->
+<!--            return false;-->
+<!--        }-->
+<!--        if(parseInt(val) <= 0) {-->
+<!--            alert("The number to order should be a positive number");-->
+<!--            e.preventDefault();-->
+<!--            return false;-->
+<!--        }   -->
+        if (!added) {
+            done.style.transform = "translate(0px)";
+            added = true;
+            document.getElementById('number').readOnly = true;
+        }
+    }
+
+
+</script>
+
+<style>
+    .form-group.required .control-label:after {
+content:"*";
+color:red;
+}
+</style>
+</body>
+</html>
